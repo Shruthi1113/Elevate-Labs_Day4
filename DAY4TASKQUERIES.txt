@@ -1,0 +1,140 @@
+select * from employee_data_cleaned;
+SELECT empid, firstname, lastname, departmenttype, division, employeestatus
+FROM employee_data_cleaned
+LIMIT 10;
+
+SELECT departmenttype, COUNT(*) AS total_employees
+FROM employee_data_cleaned
+GROUP BY departmenttype
+ORDER BY total_employees DESC;
+
+SELECT division, AVG(current_employee_rating) AS avg_rating
+FROM employee_data_cleaned
+GROUP BY division
+ORDER BY avg_rating DESC;
+
+
+SELECT employeestatus, COUNT(*) AS total
+FROM employee_data_cleaned
+GROUP BY employeestatus;
+
+
+SELECT gendercode, COUNT(*) AS total
+FROM employee_data_cleaned
+GROUP BY gendercode;
+
+
+SELECT empid, firstname, lastname, terminationtype, terminationdescription
+FROM employee_data_cleaned
+WHERE employeestatus <> 'Active';
+
+
+SELECT empid, firstname, lastname, current_employee_rating
+FROM employee_data_cleaned
+WHERE current_employee_rating > (SELECT AVG(current_employee_rating) 
+                                 FROM employee_data_cleaned);
+
+
+SELECT departmenttype, AVG(current_employee_rating) AS avg_rating
+FROM employee_data_cleaned
+GROUP BY departmenttype
+ORDER BY avg_rating DESC
+LIMIT 5;
+
+CREATE VIEW dept_summary AS
+SELECT departmenttype,
+       COUNT(*) AS total_employees,
+       AVG(current_employee_rating) AS avg_rating
+FROM employee_data_cleaned
+GROUP BY departmenttype;
+SELECT * FROM dept_summary;
+
+
+CREATE INDEX idx_department 
+ON employee_data_cleaned(departmenttype);
+
+
+SELECT empid, firstname, lastname, dob, 
+       CAST(strftime('%Y', 'now') AS INTEGER) - CAST(strftime('%Y', dob) AS INTEGER) AS age
+FROM employee_data_cleaned
+WHERE (CAST(strftime('%Y', 'now') AS INTEGER) - CAST(strftime('%Y', dob) AS INTEGER)) > 58;
+
+SELECT AVG(
+    JULIANDAY(COALESCE(exitdate, DATE('now'))) - JULIANDAY(startdate)
+) / 365.0 AS avg_years
+FROM employee_data_cleaned;
+
+
+SELECT e.empid, e.firstname || ' ' || e.lastname AS employee,
+       s.firstname || ' ' || s.lastname AS supervisor_name
+FROM employee_data_cleaned e
+INNER JOIN employee_data_cleaned s
+    ON e.supervisor = s.empid;
+
+
+SELECT departmenttype, firstname, lastname, current_employee_rating
+FROM employee_data_cleaned e
+WHERE current_employee_rating = (
+    SELECT MAX(current_employee_rating)
+    FROM employee_data_cleaned
+    WHERE departmenttype = e.departmenttype
+);
+
+
+SELECT supervisor, COUNT(*) AS team_size
+FROM employee_data_cleaned
+GROUP BY supervisor
+ORDER BY team_size DESC
+LIMIT 5;
+
+
+SELECT employeestatus, AVG(performance_score) AS avg_perf_score
+FROM employee_data_cleaned
+GROUP BY employeestatus;
+
+SELECT departmenttype, COUNT(*) AS terminated_count
+FROM employee_data_cleaned
+WHERE employeestatus <> 'Active'
+GROUP BY departmenttype
+ORDER BY terminated_count DESC
+LIMIT 1;
+
+SELECT departmenttype, racedesc, COUNT(*) AS total
+FROM employee_data_cleaned
+GROUP BY departmenttype, racedesc
+ORDER BY departmenttype, total DESC;
+
+SELECT maritaldesc, AVG(current_employee_rating) AS avg_rating
+FROM employee_data_cleaned
+GROUP BY maritaldesc
+ORDER BY avg_rating DESC;
+
+
+SELECT empid, firstname, lastname, current_employee_rating
+FROM employee_data_cleaned
+WHERE current_employee_rating > (
+    SELECT AVG(current_employee_rating) 
+    FROM employee_data_cleaned
+);
+
+
+CREATE VIEW active_employees AS
+SELECT empid, firstname, lastname, departmenttype, division, title, supervisor
+FROM employee_data_cleaned
+WHERE employeestatus = 'Active';
+SELECT * FROM active_employees;
+
+
+SELECT e.empid, e.firstname || ' ' || e.lastname AS employee,
+       s.firstname || ' ' || s.lastname AS supervisor_name
+FROM employee_data_cleaned s
+LEFT JOIN employee_data_cleaned e
+    ON e.supervisor = s.empid
+WHERE e.empid IS NOT NULL OR s.empid IS NOT NULL;
+
+
+
+
+
+
+
